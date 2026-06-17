@@ -184,10 +184,30 @@ const MOCK_DB = {
     ]
 };
 
+// Safe icon generator wrapper preventing CDN block issues
+function safeCreateIcons() {
+    try {
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    } catch (e) {
+        console.warn("Lucide icons failed to load:", e);
+    }
+}
+
+// Guest entry directly bypassing login screen
+function getStarted() {
+    appState.isLoggedIn = true;
+    document.getElementById("splash-screen").classList.remove("active");
+    document.getElementById("app-wrapper").classList.add("active");
+    updateDashboardView();
+    showToast("Ku soo dhawoow Fududeeye! (Welcome to Fududeeye)");
+}
+
 // Initialize Application
 document.addEventListener("DOMContentLoaded", () => {
     // Generate icons
-    lucide.createIcons();
+    safeCreateIcons();
     
     // Check if user is logged in (mocked)
     checkAuthStatus();
@@ -432,7 +452,7 @@ function renderFeaturedListings(categoryFilter = "ALL") {
         });
     }
     
-    lucide.createIcons();
+    safeCreateIcons();
 }
 
 // HTML Card Generator
@@ -560,7 +580,7 @@ function renderSavedItems() {
         grid.appendChild(createListingCard(listing, listing.category === "ITEM"));
     });
     
-    lucide.createIcons();
+    safeCreateIcons();
 }
 
 // FILTER SYSTEM MODALS
@@ -711,7 +731,7 @@ function applyFilters() {
         });
     }
     
-    lucide.createIcons();
+    safeCreateIcons();
 }
 
 // 5. DETAILED LISTING DETAILS VIEW MODAL
@@ -792,7 +812,7 @@ function openDetailsModal(listingId) {
     
     // Open Modal
     document.getElementById("details-modal").classList.add("active");
-    lucide.createIcons();
+    safeCreateIcons();
     
     // Async record a view event (API Simulation)
     listing.views_count++;
@@ -971,7 +991,7 @@ function simulateSelectPhoto() {
     `;
     
     container.appendChild(thumb);
-    lucide.createIcons();
+    safeCreateIcons();
     showToast("Photo selected! On-device WebP compression applied.");
 }
 
