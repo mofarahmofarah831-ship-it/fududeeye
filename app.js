@@ -5,8 +5,8 @@ let appState = {
     isLoggedIn: false,
     currentUser: {
         id: "user-1",
-        full_name: "Abdirahman Ali",
-        phone_number: "+252 90 123 4567",
+        full_name: localStorage.getItem('userName') || "Mohamed Farhan",
+        phone_number: localStorage.getItem('userPhone') || "+252 666773728",
         avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80",
         role: "AGENT",
         is_verified: true,
