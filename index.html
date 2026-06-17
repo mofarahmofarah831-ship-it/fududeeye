@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fududeeye - Somali Property & Household Marketplace Super App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+    <!-- 1. SPLASH / ONBOARDING SCREEN -->
+    <div id="splash-screen" class="splash-screen active">
+        <div class="splash-content">
+            <div class="splash-logo-container">
+                <i data-lucide="home" class="splash-logo-icon"></i>
+                <h1>Fududeeye</h1>
+            </div>
+            <p class="splash-tagline">Somali Property & Household Marketplace Super App</p>
+            <p class="splash-slogan">"Hel Guri. Iibso. Kirayso. Iibi. Hal Meel, Fudud."</p>
+            
+            <div class="splash-slides">
+                <div class="splash-slide active">
+                    <h3>Find Your Dream Home</h3>
+                    <p>Browse thousands of verified houses, apartments, and land plots all over Somalia.</p>
+                </div>
+                <div class="splash-slide">
+                    <h3>Liquidate Household Goods</h3>
+                    <p>Relocating? Sell your furniture, electronics, and household items instantly.</p>
+                </div>
+                <div class="splash-slide">
+                    <h3>Verified & Secure</h3>
+                    <p>Deals verified by Fududeeye trust scores with integrated local mobile wallet payments.</p>
+                </div>
+            </div>
+
+            <div class="splash-pagination">
+                <span class="dot active" onclick="setSplashSlide(0)"></span>
+                <span class="dot" onclick="setSplashSlide(1)"></span>
+                <span class="dot" onclick="setSplashSlide(2)"></span>
+            </div>
+
+            <div class="splash-actions">
+                <button class="btn btn-primary" onclick="openLoginModal()">Get Started</button>
+                <button class="btn btn-outline" onclick="openLoginModal()">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. LOGIN / OTP MODAL -->
+    <div id="login-modal" class="modal-overlay">
+        <div class="modal-content login-box">
+            <button class="modal-close" onclick="closeLoginModal()"><i data-lucide="x"></i></button>
+            <h2>Enter Mobile Number</h2>
+            <p class="modal-subtitle">We will send a 4-digit OTP code to verify your phone.</p>
+            
+            <div class="phone-input-container">
+                <span class="phone-prefix">+252</span>
+                <input type="tel" id="login-phone" placeholder="90 123 4567" max="9" required>
+            </div>
+            <div class="telecom-selector">
+                <label>Select your network:</label>
+                <div class="telecom-options">
+                    <button class="telecom-btn active" data-network="Hormuud" onclick="selectTelecom(this)">Hormuud</button>
+                    <button class="telecom-btn" data-network="Telesom" onclick="selectTelecom(this)">Telesom</button>
+                    <button class="telecom-btn" data-network="Golis" onclick="selectTelecom(this)">Golis</button>
+                    <button class="telecom-btn" data-network="Somtel" onclick="selectTelecom(this)">Somtel</button>
+                </div>
+            </div>
+            <button class="btn btn-primary btn-block" onclick="sendOTP()">Request Verification Code</button>
+
+            <!-- OTP Code Verification Step (Initially Hidden) -->
+            <div id="otp-step" class="otp-step">
+                <hr>
+                <h3>Enter 4-Digit Code</h3>
+                <p>Sent to <span id="sent-phone-display">+252 90 123 4567</span></p>
+                <div class="otp-inputs">
+                    <input type="text" id="otp-1" class="otp-digit" maxlength="1" onkeyup="moveOTPFocus(this, 'otp-2')">
+                    <input type="text" id="otp-2" class="otp-digit" maxlength="1" onkeyup="moveOTPFocus(this, 'otp-3')">
+                    <input type="text" id="otp-3" class="otp-digit" maxlength="1" onkeyup="moveOTPFocus(this, 'otp-4')">
+                    <input type="text" id="otp-4" class="otp-digit" maxlength="1" onkeyup="moveOTPFocus(this, 'verify-btn')">
+                </div>
+                <button id="verify-btn" class="btn btn-accent btn-block" onclick="verifyOTP()">Verify & Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP WRAPPER -->
+    <div id="app-wrapper" class="app-wrapper">
+        
+        <!-- TOP NAVIGATION BAR -->
+        <header class="top-nav">
+            <div class="nav-left">
+                <button class="drawer-trigger" onclick="toggleSidebar()"><i data-lucide="menu"></i></button>
+                <div class="brand-logo" onclick="switchTab('home')">
+                    <i data-lucide="home" class="brand-logo-icon"></i>
+                    <span>Fududeeye</span>
+                </div>
+                <nav class="nav-links">
+                    <a href="#" class="active" id="nav-home-link" onclick="switchTab('home')">HOME</a>
+                    <a href="#" id="nav-explore-link" onclick="switchTab('search')">EXPLORE</a>
+                    <a href="#" id="nav-services-link" onclick="switchTab('dashboard')">SERVICES</a>
+                </nav>
+            </div>
+
+            <div class="nav-right">
+                <!-- Notifications Bell -->
+                <div class="nav-action-btn notification-btn" onclick="toggleNotificationPanel(event)">
+                    <i data-lucide="bell"></i>
+                    <span class="notification-badge" id="notif-badge">3</span>
+                    <!-- Notifications Dropdown -->
+                    <div id="notification-panel" class="notification-panel">
+                        <div class="notif-header">
+                            <h4>Notifications</h4>
+                            <span onclick="markAllNotificationsRead(event)">Mark all read</span>
+                        </div>
+                        <div class="notif-list">
+                            <div class="notif-item unread">
+                                <span class="notif-dot"></span>
+                                <div class="notif-body">
+                                    <p>Your listing <strong>Modern 3 Bedroom Villa</strong> has been approved!</p>
+                                    <span class="notif-time">2 mins ago</span>
+                                </div>
+                            </div>
+                            <div class="notif-item unread">
+                                <span class="notif-dot"></span>
+                                <div class="notif-body">
+                                    <p>New message from <strong>Agent Farah</strong> regarding Modern Penthouse.</p>
+                                    <span class="notif-time">1 hour ago</span>
+                                </div>
+                            </div>
+                            <div class="notif-item">
+                                <div class="notif-body">
+                                    <p>You received a USSD payment confirmation for $5.00 (Zaad).</p>
+                                    <span class="notif-time">Yesterday</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Saved Items Button -->
+                <div class="nav-action-btn" onclick="switchTab('saved')" title="Saved Items">
+                    <i data-lucide="bookmark"></i>
+                </div>
+
+                <!-- User Profile Info -->
+                <div class="user-profile-menu" onclick="switchTab('dashboard')">
+                    <img id="user-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80" alt="Avatar" class="avatar-img">
+                </div>
+            </div>
+        </header>
+
+        <div class="layout-container">
+
+            <!-- LEFT SIDEBAR -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-brand">
+                    <h2>Fududeeye</h2>
+                    <span><i data-lucide="sparkles" class="sidebar-sparkle-icon"></i> Somali Super App</span>
+                </div>
+
+                <ul class="sidebar-menu">
+                    <li class="menu-item active" id="tab-home" onclick="switchTab('home')">
+                        <i data-lucide="home"></i>
+                        <span>HOME</span>
+                    </li>
+                    <li class="menu-item" id="tab-search" onclick="switchTab('search')">
+                        <i data-lucide="search"></i>
+                        <span>SEARCH</span>
+                    </li>
+                    <li class="menu-item" id="tab-listings" onclick="switchTab('listings')">
+                        <i data-lucide="list"></i>
+                        <span>LISTINGS</span>
+                    </li>
+                    <li class="menu-item" id="tab-messages" onclick="switchTab('messages')">
+                        <i data-lucide="message-square"></i>
+                        <span>MESSAGES</span>
+                        <span class="menu-badge" id="message-badge">1</span>
+                    </li>
+                    <li class="menu-item" id="tab-saved" onclick="switchTab('saved')">
+                        <i data-lucide="heart"></i>
+                        <span>SAVED ITEMS (<span id="saved-count-display">0</span>)</span>
+                    </li>
+                </ul>
+
+                <button class="btn btn-accent btn-post-listing" onclick="openAddListingModal()">
+                    <i data-lucide="plus"></i>
+                    <span>POST LISTING</span>
+                </button>
+            </aside>
+
+            <!-- MAIN CONTENT DISPLAY AREA -->
+            <main class="main-content" id="main-content">
+
+                <!-- VIEW A: HOME PAGE -->
+                <section id="view-home" class="app-view active">
+                    
+                    <!-- Search bar and Location picker -->
+                    <div class="search-header-row">
+                        <div class="search-input-box">
+                            <i data-lucide="search" class="search-icon"></i>
+                            <input type="text" id="global-search" placeholder="Search for houses, land, or items..." oninput="handleGlobalSearch(this.value)">
+                            <button class="filter-slider-btn" onclick="openFilterModal()"><i data-lucide="sliders-horizontal"></i></button>
+                        </div>
+                        <div class="location-dropdown-container">
+                            <button class="location-btn" id="location-picker-btn" onclick="toggleLocationMenu(event)">
+                                <i data-lucide="map-pin" class="pin-icon"></i>
+                                <span id="current-location-text">Bosaso, Puntland</span>
+                                <i data-lucide="chevron-down" class="arrow-icon"></i>
+                            </button>
+                            <div id="location-menu" class="location-menu">
+                                <div class="location-option" onclick="selectLocation('Bosaso, Puntland')">Bosaso, Puntland</div>
+                                <div class="location-option" onclick="selectLocation('Mogadishu, Banadir')">Mogadishu, Banadir</div>
+                                <div class="location-option" onclick="selectLocation('Hargeisa, Maroodi Jeex')">Hargeisa, Maroodi Jeex</div>
+                                <div class="location-option" onclick="selectLocation('Garowe, Nugaal')">Garowe, Nugaal</div>
+                                <div class="location-option" onclick="selectLocation('Kismayo, Lower Juba')">Kismayo, Lower Juba</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Pills -->
+                    <div class="category-pills-container">
+                        <div class="category-pill active" data-category="ALL" onclick="selectCategoryPill(this)">All Categories</div>
+                        <div class="category-pill" data-category="RENT" onclick="selectCategoryPill(this)">Rentals</div>
+                        <div class="category-pill" data-category="SALE" onclick="selectCategoryPill(this)">Sales</div>
+                        <div class="category-pill" data-category="ITEM" onclick="selectCategoryPill(this)">Home Items</div>
+                    </div>
+
+                    <!-- Featured Properties Section -->
+                    <div class="section-header">
+                        <h2>Featured Properties</h2>
+                        <span class="view-all-link" onclick="switchCategoryFilter('RENT')">View All <i data-lucide="arrow-right"></i></span>
+                    </div>
+                    <div class="listings-grid" id="featured-properties-grid">
+                        <!-- Dynamic Featured Properties Cards go here -->
+                    </div>
+
+                    <!-- Featured Home Items Section -->
+                    <div class="section-header">
+                        <h2>Featured Home Items</h2>
+                        <span class="view-all-link" onclick="switchCategoryFilter('ITEM')">View All <i data-lucide="arrow-right"></i></span>
+                    </div>
+                    <div class="listings-grid items-grid-2col" id="featured-items-grid">
+                        <!-- Dynamic Featured Home Items Cards go here -->
+                    </div>
+
+                </section>
+
+                <!-- VIEW B: SEARCH RESULTS PAGE (Vertical/Grid List) -->
+                <section id="view-search" class="app-view">
+                    <div class="search-header-row">
+                        <button class="back-nav-btn" onclick="switchTab('home')"><i data-lucide="arrow-left"></i></button>
+                        <h2>Search Results</h2>
+                        <span class="results-count-label" id="results-count-text">0 Results Found</span>
+                        <button class="btn btn-outline" style="margin-left: auto;" onclick="openFilterModal()"><i data-lucide="sliders-horizontal"></i> Filter</button>
+                    </div>
+
+                    <div class="listings-grid" id="search-results-grid">
+                        <!-- Dynamic Search Results cards go here -->
+                    </div>
+                </section>
+
+                <!-- VIEW C: CHAT MESSAGES CENTER -->
+                <section id="view-messages" class="app-view">
+                    <div class="chat-container">
+                        <!-- Chat Threads List -->
+                        <div class="chat-threads">
+                            <div class="chat-header">
+                                <h3>Messages</h3>
+                            </div>
+                            <div class="threads-list" id="chat-threads-list">
+                                <!-- Dynamic Chat Threads -->
+                            </div>
+                        </div>
+
+                        <!-- Chat Dialog Window -->
+                        <div class="chat-window" id="chat-window">
+                            <div class="chat-window-placeholder" id="chat-placeholder">
+                                <i data-lucide="message-square" style="width: 48px; height: 48px; color: var(--slate); margin-bottom: 1rem;"></i>
+                                <p>Select a message thread to start chatting.</p>
+                            </div>
+                            <div class="chat-window-content hide" id="chat-active-window">
+                                <div class="chat-agent-header">
+                                    <img src="" alt="Agent Avatar" id="active-agent-avatar" class="avatar-img-sm">
+                                    <div class="agent-info">
+                                        <h4 id="active-agent-name">Abdi Ali</h4>
+                                        <span class="agent-status" id="active-agent-status"><span class="status-dot"></span> Online</span>
+                                    </div>
+                                    <div class="agent-actions">
+                                        <button class="btn-chat-call" id="agent-phone-btn" onclick="simulateCall()"><i data-lucide="phone"></i> Call</button>
+                                        <button class="btn-chat-whatsapp" id="agent-whatsapp-btn" onclick="simulateWhatsApp()"><i data-lucide="message-circle"></i> WhatsApp</button>
+                                    </div>
+                                </div>
+                                <div class="chat-messages-box" id="chat-messages-box">
+                                    <!-- Dynamic chat messages go here -->
+                                </div>
+                                <div class="chat-input-bar">
+                                    <input type="text" id="chat-input" placeholder="Type a message..." onkeypress="handleChatKeyPress(event)">
+                                    <button class="chat-send-btn" onclick="sendMessage()"><i data-lucide="send"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW D: SAVED / FAVORITES ITEMS -->
+                <section id="view-saved" class="app-view">
+                    <div class="section-header">
+                        <h2>Saved Items</h2>
+                    </div>
+                    <div class="listings-grid" id="saved-items-grid">
+                        <!-- Dynamic Saved Cards go here -->
+                    </div>
+                </section>
+
+                <!-- VIEW E: USER DASHBOARD / PROFILE -->
+                <section id="view-dashboard" class="app-view">
+                    <div class="dashboard-header">
+                        <div class="dashboard-user-info">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80" alt="Profile avatar" class="avatar-img-lg" id="dashboard-avatar">
+                            <div>
+                                <h2 id="dashboard-username">Abdirahman Ali</h2>
+                                <p class="verified-phone"><i data-lucide="phone" style="width: 14px; height: 14px;"></i> <span id="dashboard-phone">+252 90 123 4567</span></p>
+                                <span class="badge badge-verified" id="agent-badge"><i data-lucide="check-circle" style="width: 12px; height: 12px;"></i> Verified Agent</span>
+                            </div>
+                        </div>
+                        <div class="trust-rating-card">
+                            <h4>Reliability Trust Rating (T)</h4>
+                            <div class="trust-score-display">
+                                <span class="trust-score-value" id="dashboard-trust-score">92%</span>
+                                <span class="trust-grade">High Trust</span>
+                            </div>
+                            <p class="trust-formula-caption">Calculated via: $T = 0.4 V + 0.3 R + 0.3 A$</p>
+                        </div>
+                    </div>
+
+                    <!-- Stats trackers ribbon -->
+                    <div class="stats-ribbon">
+                        <div class="stat-card border-rust" onclick="filterDashboardListings('ACTIVE')">
+                            <h3 id="stat-active-count">0</h3>
+                            <p>Active Listings</p>
+                        </div>
+                        <div class="stat-card border-navy" onclick="filterDashboardListings('SOLD_RENTED')">
+                            <h3 id="stat-sold-count">0</h3>
+                            <p>Sold / Rented</p>
+                        </div>
+                        <div class="stat-card border-slate" onclick="switchTab('saved')">
+                            <h3 id="stat-saved-count">0</h3>
+                            <p>Saved Items</p>
+                        </div>
+                    </div>
+
+                    <!-- Manage Listings Section -->
+                    <div class="my-listings-section">
+                        <div class="section-header">
+                            <h3>My Listings</h3>
+                            <button class="btn btn-outline btn-sm" onclick="openAddListingModal()"><i data-lucide="plus"></i> Add New</button>
+                        </div>
+                        <div class="my-listings-list" id="my-listings-container">
+                            <!-- Dynamic user owned listings -->
+                        </div>
+                    </div>
+
+                    <!-- Settings Options -->
+                    <div class="settings-list-section">
+                        <h3>System Settings</h3>
+                        <div class="settings-item" onclick="switchTab('messages')">
+                            <div class="settings-left">
+                                <i data-lucide="message-square"></i>
+                                <span>Message Center</span>
+                            </div>
+                            <i data-lucide="chevron-right" class="chevron-slate"></i>
+                        </div>
+                        <div class="settings-item" onclick="toggleVerificationStatus()">
+                            <div class="settings-left">
+                                <i data-lucide="shield-check"></i>
+                                <span>Request Agent Verification</span>
+                            </div>
+                            <span class="badge" id="verification-request-badge">Get Verified</span>
+                        </div>
+                        <div class="settings-item" onclick="alert('Help & Support is available at support@fududeeye.so')">
+                            <div class="settings-left">
+                                <i data-lucide="help-circle"></i>
+                                <span>Help & Support</span>
+                            </div>
+                            <i data-lucide="chevron-right" class="chevron-slate"></i>
+                        </div>
+                        <div class="settings-item logout-item" onclick="logOut()">
+                            <div class="settings-left">
+                                <i data-lucide="log-out"></i>
+                                <span>Log Out</span>
+                            </div>
+                            <i data-lucide="chevron-right" class="chevron-slate"></i>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- 3. ADVANCED SEARCH / FILTER MODAL -->
+    <div id="filter-modal" class="modal-overlay">
+        <div class="modal-content filter-box">
+            <div class="filter-header">
+                <h2>Search Filters</h2>
+                <span class="reset-link" onclick="resetFilters()">Reset All</span>
+                <button class="modal-close-btn" onclick="closeFilterModal()"><i data-lucide="x"></i></button>
+            </div>
+            
+            <div class="filter-body">
+                <!-- Location Picker -->
+                <div class="filter-group">
+                    <label class="filter-label">City Location</label>
+                    <select id="filter-location" class="form-control">
+                        <option value="">All Regions</option>
+                        <option value="Bosaso, Puntland">Bosaso, Puntland</option>
+                        <option value="Mogadishu, Banadir">Mogadishu, Banadir</option>
+                        <option value="Hargeisa, Maroodi Jeex">Hargeisa, Maroodi Jeex</option>
+                        <option value="Garowe, Nugaal">Garowe, Nugaal</option>
+                        <option value="Kismayo, Lower Juba">Kismayo, Lower Juba</option>
+                    </select>
+                </div>
+
+                <!-- Category Toggles -->
+                <div class="filter-group">
+                    <label class="filter-label">Listing Context</label>
+                    <div class="category-toggle-tabs">
+                        <button class="toggle-tab active" data-context="ALL" onclick="setFilterContext(this)">All</button>
+                        <button class="toggle-tab" data-context="RENT" onclick="setFilterContext(this)">For Rent</button>
+                        <button class="toggle-tab" data-context="SALE" onclick="setFilterContext(this)">For Sale</button>
+                        <button class="toggle-tab" data-context="ITEM" onclick="setFilterContext(this)">Home Items</button>
+                    </div>
+                </div>
+
+                <!-- Price Range Inputs -->
+                <div class="filter-group">
+                    <label class="filter-label">Price Range (USD)</label>
+                    <div class="price-range-inputs">
+                        <input type="number" id="filter-min-price" placeholder="Min Price">
+                        <span>to</span>
+                        <input type="number" id="filter-max-price" placeholder="Max Price">
+                    </div>
+                </div>
+
+                <!-- Property Specific Fields (Visible when Rent/Sale is selected) -->
+                <div id="property-filters-group">
+                    <div class="filter-group">
+                        <label class="filter-label">Property Type</label>
+                        <select id="filter-property-type" class="form-control">
+                            <option value="">Any Type</option>
+                            <option value="HOUSE">House</option>
+                            <option value="APARTMENT">Apartment</option>
+                            <option value="LAND">Land Plot</option>
+                            <option value="COMMERCIAL">Commercial Space</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Bedrooms</label>
+                        <div class="bedroom-pills">
+                            <button class="bed-pill active" data-beds="any" onclick="setFilterBeds(this)">Any</button>
+                            <button class="bed-pill" data-beds="1" onclick="setFilterBeds(this)">1</button>
+                            <button class="bed-pill" data-beds="2" onclick="setFilterBeds(this)">2</button>
+                            <button class="bed-pill" data-beds="3" onclick="setFilterBeds(this)">3</button>
+                            <button class="bed-pill" data-beds="4" onclick="setFilterBeds(this)">4+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-footer">
+                <button class="btn btn-primary btn-block" onclick="applyFilters()">Apply Filters</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. ADD LISTING MODAL -->
+    <div id="add-listing-modal" class="modal-overlay">
+        <div class="modal-content add-listing-box">
+            <div class="filter-header">
+                <h2>Add New Listing</h2>
+                <button class="modal-close-btn" onclick="closeAddListingModal()"><i data-lucide="x"></i></button>
+            </div>
+
+            <form id="add-listing-form" onsubmit="publishListing(event)">
+                <div class="filter-body">
+                    <!-- Category Selection -->
+                    <div class="filter-group">
+                        <label class="filter-label">Category</label>
+                        <div class="category-toggle-tabs">
+                            <button type="button" class="toggle-tab active" data-new-cat="RENT" onclick="setNewListingCategory('RENT')">For Rent</button>
+                            <button type="button" class="toggle-tab" data-new-cat="SALE" onclick="setNewListingCategory('SALE')">For Sale</button>
+                            <button type="button" class="toggle-tab" data-new-cat="ITEM" onclick="setNewListingCategory('ITEM')">Home Item</button>
+                        </div>
+                    </div>
+
+                    <!-- Title -->
+                    <div class="filter-group">
+                        <label class="filter-label">Listing Title</label>
+                        <input type="text" id="new-title" class="form-control" placeholder="e.g. Modern 3 Bedroom Villa near Sea" required minlength="10">
+                    </div>
+
+                    <!-- Price -->
+                    <div class="filter-group">
+                        <label class="filter-label">Price (USD)</label>
+                        <input type="number" id="new-price" class="form-control" placeholder="e.g. 350 for Rent, or 450000 for Sale" required min="1">
+                    </div>
+
+                    <!-- Location Selector -->
+                    <div class="filter-group">
+                        <label class="filter-label">City Location</label>
+                        <select id="new-location" class="form-control" required>
+                            <option value="">Select City</option>
+                            <option value="Bosaso, Puntland">Bosaso, Puntland</option>
+                            <option value="Mogadishu, Banadir">Mogadishu, Banadir</option>
+                            <option value="Hargeisa, Maroodi Jeex">Hargeisa, Maroodi Jeex</option>
+                            <option value="Garowe, Nugaal">Garowe, Nugaal</option>
+                            <option value="Kismayo, Lower Juba">Kismayo, Lower Juba</option>
+                        </select>
+                    </div>
+
+                    <!-- Landmarks Address Notes -->
+                    <div class="filter-group">
+                        <label class="filter-label">Landmark / Landmarks Address Notes</label>
+                        <input type="text" id="new-landmark" class="form-control" placeholder="e.g. Near Star Hotel, Wadajir District">
+                    </div>
+
+                    <!-- PROPERTY SPECIFIC FIELDS (Hidden for Items) -->
+                    <div id="new-property-fields">
+                        <div class="form-row">
+                            <div class="filter-group flex-1">
+                                <label class="filter-label">Property Type</label>
+                                <select id="new-prop-type" class="form-control">
+                                    <option value="HOUSE">House</option>
+                                    <option value="APARTMENT">Apartment</option>
+                                    <option value="LAND">Land Plot</option>
+                                    <option value="COMMERCIAL">Commercial Space</option>
+                                </select>
+                            </div>
+                            <div class="filter-group flex-1">
+                                <label class="filter-label">Area (sqm)</label>
+                                <input type="number" id="new-area" class="form-control" placeholder="e.g. 150">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="filter-group flex-1">
+                                <label class="filter-label">Bedrooms</label>
+                                <input type="number" id="new-beds" class="form-control" placeholder="e.g. 3">
+                            </div>
+                            <div class="filter-group flex-1">
+                                <label class="filter-label">Bathrooms</label>
+                                <input type="number" id="new-baths" class="form-control" placeholder="e.g. 2">
+                            </div>
+                        </div>
+
+                        <!-- Amenities -->
+                        <div class="filter-group">
+                            <label class="filter-label">Amenities</label>
+                            <div class="amenities-grid">
+                                <label><input type="checkbox" id="amenity-water"> Water Available</label>
+                                <label><input type="checkbox" id="amenity-electricity"> Electricity 24/7</label>
+                                <label><input type="checkbox" id="amenity-security"> Security Guard</label>
+                                <label><input type="checkbox" id="amenity-parking"> Parking Space</label>
+                                <label><input type="checkbox" id="amenity-furnished"> Furnished</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HOME ITEMS SPECIFIC FIELDS (Hidden for Properties) -->
+                    <div id="new-item-fields" class="hide">
+                        <div class="form-row">
+                            <div class="filter-group flex-1">
+                                <label class="filter-label">Item Condition</label>
+                                <select id="new-item-condition" class="form-control">
+                                    <option value="NEW">New</option>
+                                    <option value="LIKE_NEW">Like New</option>
+                                    <option value="USED">Used</option>
+                                </select>
+                            </div>
+                            <div class="filter-group flex-1">
+                                <label class="filter-label">Brand / Manufacturer</label>
+                                <input type="text" id="new-item-brand" class="form-control" placeholder="e.g. Samsung, LG">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="filter-group">
+                        <label class="filter-label">Description (Max 500 characters)</label>
+                        <textarea id="new-description" class="form-control" rows="4" maxlength="500" placeholder="Describe the listing features, condition, terms..." required oninput="updateCharCount(this)"></textarea>
+                        <span class="char-count" id="desc-char-count">0/500</span>
+                    </div>
+
+                    <!-- Photo Upload Simulation -->
+                    <div class="filter-group">
+                        <label class="filter-label">Attach Photos</label>
+                        <div class="photo-upload-grid">
+                            <div class="upload-box active" onclick="simulateSelectPhoto()">
+                                <i data-lucide="plus-circle" style="color: var(--accent); width: 28px; height: 28px;"></i>
+                                <span>Add Photo</span>
+                            </div>
+                            <div id="attached-photos-container" class="attached-photos-container">
+                                <!-- Selected photos will show here -->
+                            </div>
+                        </div>
+                        <span class="upload-tip">Optimizing image size (WebP format compression) on upload to save bandwidth...</span>
+                    </div>
+                </div>
+
+                <div class="filter-footer">
+                    <button type="submit" class="btn btn-accent btn-block">Publish Listing</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 5. DETAILED LISTING DETAILS VIEW (MODAL OVERLAY) -->
+    <div id="details-modal" class="modal-overlay">
+        <div class="modal-content details-box">
+            <!-- Translucent Floating Header -->
+            <div class="details-nav-header">
+                <button class="nav-round-btn" onclick="closeDetailsModal()"><i data-lucide="arrow-left"></i></button>
+                <button class="nav-round-btn heart-btn-toggle" id="details-heart-btn" onclick="toggleDetailsFavorite()"><i data-lucide="heart"></i></button>
+            </div>
+
+            <!-- Hero Image Slider -->
+            <div class="details-hero-slider">
+                <img id="details-hero-img" src="" alt="Listing Hero">
+                <div class="slider-tracker" id="details-slider-tracker">1/1</div>
+                <!-- Navigation arrows -->
+                <button class="slider-arrow prev" onclick="slideHeroImage(-1)"><i data-lucide="chevron-left"></i></button>
+                <button class="slider-arrow next" onclick="slideHeroImage(1)"><i data-lucide="chevron-right"></i></button>
+            </div>
+
+            <div class="details-body">
+                <!-- Title Block -->
+                <div class="details-title-row">
+                    <div>
+                        <span class="category-tag-badge" id="details-category-badge">FOR RENT</span>
+                        <h2 id="details-title" class="text-navy">Luxury 3 Bedroom Apartment</h2>
+                        <p id="details-location" class="text-slate"><i data-lucide="map-pin" style="width: 14px; height: 14px;"></i> Wadajir, Bosaso</p>
+                        <p id="details-landmark" class="landmark-text">Near Star Hotel</p>
+                    </div>
+                    <div class="details-price-badge">
+                        <span id="details-price">$350</span>
+                        <span id="details-price-freq" class="text-slate">/ mo</span>
+                    </div>
+                </div>
+
+                <!-- Specifications Ribbon (Properties Only) -->
+                <div class="specs-ribbon" id="details-specs-ribbon">
+                    <div class="spec-ribbon-item">
+                        <i data-lucide="bed"></i>
+                        <span id="details-beds">3 Beds</span>
+                    </div>
+                    <div class="spec-ribbon-item">
+                        <i data-lucide="bath"></i>
+                        <span id="details-baths">2 Baths</span>
+                    </div>
+                    <div class="spec-ribbon-item">
+                        <i data-lucide="maximize"></i>
+                        <span id="details-area">120 m²</span>
+                    </div>
+                    <div class="spec-ribbon-item">
+                        <i data-lucide="home"></i>
+                        <span id="details-type">Apartment</span>
+                    </div>
+                </div>
+
+                <!-- Product Condition Ribbon (Marketplace Items Only) -->
+                <div class="specs-ribbon hide" id="details-item-ribbon">
+                    <div class="spec-ribbon-item">
+                        <i data-lucide="tag"></i>
+                        <span id="details-item-condition">LIKE NEW</span>
+                    </div>
+                    <div class="spec-ribbon-item">
+                        <i data-lucide="package"></i>
+                        <span id="details-item-brand">Samsung</span>
+                    </div>
+                </div>
+
+                <!-- Identity Trust Verification Section -->
+                <div class="trust-indicator-bar">
+                    <div class="trust-left">
+                        <i data-lucide="shield-check" class="shield-verified-icon"></i>
+                        <div>
+                            <h4>Listing Trust Index</h4>
+                            <p>Anti-Scam Verification Score: <strong id="details-trust-score">85%</strong></p>
+                        </div>
+                    </div>
+                    <span class="badge badge-trust-high" id="details-trust-level">Highly Reliable</span>
+                </div>
+
+                <!-- Description Area -->
+                <div class="details-description">
+                    <h3>Description</h3>
+                    <p id="details-desc">A beautiful apartment located in the center of Bosaso with ocean view and active utilities. Suitable for families.</p>
+                </div>
+
+                <!-- Features / Amenities Checklist (Properties Only) -->
+                <div class="details-amenities-section" id="details-amenities-group">
+                    <h3>Property Features</h3>
+                    <div class="features-checklist-grid" id="details-features-grid">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+                <!-- Agent Contact Profile Card -->
+                <div class="agent-contact-card">
+                    <img id="details-agent-avatar" src="" alt="Agent Avatar" class="avatar-img-sm">
+                    <div class="agent-details">
+                        <h4 id="details-agent-name">Farah Hashi</h4>
+                        <p id="details-agent-role">Verified Broker Checkmark</p>
+                    </div>
+                    <div class="trust-small-badge" id="details-agent-trust">T = 85%</div>
+                </div>
+            </div>
+
+            <!-- Persistent Bottom Action Bar -->
+            <div class="details-action-bar">
+                <button class="btn btn-primary" onclick="startChatFromDetails()"><i data-lucide="message-square"></i> Message</button>
+                <button class="btn btn-accent" onclick="triggerCallDialer()"><i data-lucide="phone"></i> Call / WhatsApp</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. USSD PUSH MOBILE MONEY PAYMENT SIMULATOR MODAL -->
+    <div id="ussd-modal" class="modal-overlay">
+        <div class="ussd-phone-mockup">
+            <div class="ussd-phone-screen">
+                <div class="ussd-top-bar">
+                    <span>11:04 AM</span>
+                    <span style="float: right;"><i data-lucide="signal" style="width: 14px; height: 14px;"></i> 4G</span>
+                </div>
+                <div class="ussd-modal-box">
+                    <h3 id="ussd-title">Zaad Service</h3>
+                    <p id="ussd-message">Do you want to pay $5.00 to Fududeeye Company to feature your listing "Modern 3 Bedroom Villa" for 7 Days?</p>
+                    
+                    <div class="ussd-input-row">
+                        <span class="ussd-input-label">PIN: </span>
+                        <input type="password" id="ussd-pin" placeholder="Enter PIN" maxlength="4">
+                    </div>
+
+                    <div class="ussd-buttons">
+                        <button class="btn-ussd cancel" onclick="cancelUSSD()">Cancel</button>
+                        <button class="btn-ussd send" onclick="submitUSSD()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. GLOBAL TOAST/NOTIFICATION BANNER -->
+    <div id="toast-banner" class="toast-banner">
+        <span id="toast-message">Notification message here</span>
+    </div>
+
+    <!-- 8. JS APP CONTROLLER -->
+    <script src="app.js"></script>
+</body>
+</html>
