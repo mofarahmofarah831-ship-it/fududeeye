@@ -17,7 +17,7 @@ const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
                      'sb_publishable_nq4oJ6A-My-tL2ZOb3Facg_zzC_EAuE';
 
 // Create Supabase client from global library object safely avoiding shadowing issues
-const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+var supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 
 /* Fududeeye Somali Property & Household Marketplace Super App - Application Controller */
