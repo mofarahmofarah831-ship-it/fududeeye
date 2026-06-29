@@ -64,90 +64,6 @@ let appState = {
 const MOCK_DB = {
     listings: [
         {
-            id: "list-1",
-            user_id: "user-2",
-            user_name: "Farah Hashi",
-            user_avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&h=100&q=80",
-            user_role: "Verified Broker",
-            user_trust: 85,
-            category: "SALE",
-            title: "Modern 5 Bedroom Luxury Villa",
-            description: "A gorgeous modern custom-built villa in a premium neighbourhood of Bosaso. High security, close to markets, features marble flooring, landscaped garden, private parking, and integrated water reservation system. Perfect for families looking for ready-to-move prestige housing.",
-            price: 450000,
-            location_name: "Bosaso, Puntland",
-            address_notes: "Near Star Hotel, Wadajir District",
-            images: ["assets/modern_villa.png"],
-            status: "ACTIVE",
-            views_count: 342,
-            property_type: "HOUSE",
-            bedrooms: 5,
-            bathrooms: 4,
-            area_sqm: 320,
-            has_water: true,
-            has_electricity: true,
-            has_security: true,
-            has_parking: true,
-            is_furnished: false,
-            badge: "NEW LISTING",
-            created_at: "2026-06-10T12:00:00Z"
-        },
-        {
-            id: "list-2",
-            user_id: "user-3",
-            user_name: "Sahra Yusuf",
-            user_avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&h=100&q=80",
-            user_role: "Verified Agent",
-            user_trust: 90,
-            category: "RENT",
-            title: "Luxury Seafront 3 Bedroom Penthouse",
-            description: "Breathtaking ocean views from this premium penthouse high-rise tower. Experience cool breeze, 24/7 solar backing power, security guards, high speed elevator, and fully furnished master bedrooms. Directly opposite the main coastal walkway.",
-            price: 1200,
-            location_name: "Bosaso, Puntland",
-            address_notes: "Marina Road, Port Sector",
-            images: ["assets/seafront_tower.png"],
-            status: "ACTIVE",
-            views_count: 512,
-            property_type: "APARTMENT",
-            bedrooms: 3,
-            bathrooms: 2.5,
-            area_sqm: 160,
-            has_water: true,
-            has_electricity: true,
-            has_security: true,
-            has_parking: true,
-            is_furnished: true,
-            badge: "HOT DEAL",
-            created_at: "2026-06-12T15:30:00Z"
-        },
-        {
-            id: "list-3",
-            user_id: "user-4",
-            user_name: "Warsame Dilaal",
-            user_avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&h=100&q=80",
-            user_role: "Broker",
-            user_trust: 76,
-            category: "SALE",
-            title: "Prime Agricultural Farmland Plot",
-            description: "High quality farming land located on the outskirts of Bosaso. Fertile soil suitable for date palms, citrus fruits, and vegetable farming. Has deep well access. Clean deed register papers ready for immediate title transfer.",
-            price: 85000,
-            location_name: "Bosaso, Puntland",
-            address_notes: "Galgala Valley Access Road",
-            images: ["assets/farmland_plot.png"],
-            status: "ACTIVE",
-            views_count: 129,
-            property_type: "LAND",
-            bedrooms: null,
-            bathrooms: null,
-            area_sqm: 10000,
-            has_water: true,
-            has_electricity: false,
-            has_security: false,
-            has_parking: true,
-            is_furnished: false,
-            badge: "HOT DEAL",
-            created_at: "2026-06-15T09:00:00Z"
-        },
-        {
             id: "list-4",
             user_id: "user-5",
             user_name: "Khadra Elmi",
@@ -230,8 +146,13 @@ async function fetchProperties() {
 
 // Map database property layout to local listing model
 function mapSupabasePropertyToListing(prop) {
-    let images = ["assets/modern_villa.png"]; // default image fallback
-    if (prop.images) {
+    // Determine the image sources from database columns (prioritizing 'image' and 'image_url')
+    let images = [];
+    if (prop.image) {
+        images = [prop.image];
+    } else if (prop.image_url) {
+        images = [prop.image_url];
+    } else if (prop.images) {
         if (Array.isArray(prop.images)) {
             images = prop.images;
         } else if (typeof prop.images === 'string') {
@@ -245,10 +166,8 @@ function mapSupabasePropertyToListing(prop) {
                 images = [prop.images];
             }
         }
-    } else if (prop.image_url) {
-        images = [prop.image_url];
-    } else if (prop.image) {
-        images = [prop.image];
+    } else {
+        images = ["assets/modern_villa.png"]; // default fallback
     }
 
     return {
@@ -262,7 +181,7 @@ function mapSupabasePropertyToListing(prop) {
         title: prop.title || "Untitled Property",
         description: prop.description || "No description provided.",
         price: prop.price || 0,
-        location_name: prop.location_name || prop.location || "Bosaso, Puntland",
+        location_name: prop.location || prop.location_name || "Bosaso, Puntland",
         address_notes: prop.address_notes || prop.address || "",
         images: images,
         status: prop.status || "ACTIVE",
@@ -283,18 +202,17 @@ function mapSupabasePropertyToListing(prop) {
 
 // Fetch from Supabase and dynamically replace hardcoded listings
 async function initSupabaseData() {
+    // ALWAYS remove the hardcoded mock properties (SALE/RENT category) from MOCK_DB.listings
+    MOCK_DB.listings = MOCK_DB.listings.filter(listing => listing.category === "ITEM");
+    
     const dbProperties = await fetchProperties();
     if (dbProperties && dbProperties.length > 0) {
         // Map to format
         const mappedProperties = dbProperties.map(mapSupabasePropertyToListing);
-        
-        // Remove hardcoded properties (RENT/SALE) but keep ITEM listings
-        MOCK_DB.listings = MOCK_DB.listings.filter(listing => listing.category === "ITEM");
-        
         // Combine them
         MOCK_DB.listings = [...mappedProperties, ...MOCK_DB.listings];
     } else {
-        console.warn("No properties fetched from Supabase, or failed to connect. Keeping mock data.");
+        console.warn("No properties fetched from Supabase, or failed to connect.");
     }
 }
 
