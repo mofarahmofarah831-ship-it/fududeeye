@@ -1,8 +1,18 @@
+// Browser fallback for process.env to prevent ReferenceError at runtime
+if (typeof process === 'undefined') {
+    window.process = {
+        env: {
+            NEXT_PUBLIC_SUPABASE_URL: '',
+            NEXT_PUBLIC_SUPABASE_ANON_KEY: ''
+        }
+    };
+}
+
 // Supabase connection configuration using environment variables or fallbacks
-const SUPABASE_URL = (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_SUPABASE_URL) || 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 
                      (typeof window !== 'undefined' && window.NEXT_PUBLIC_SUPABASE_URL) || 
                      'https://qzkwkiksdyfovxtdyody.supabase.co';
-const SUPABASE_KEY = (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) || 
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 
                      (typeof window !== 'undefined' && window.NEXT_PUBLIC_SUPABASE_ANON_KEY) || 
                      'sb_publishable_nq4oJ6A-My-tL2ZOb3Facg_zzC_EAuE';
 
