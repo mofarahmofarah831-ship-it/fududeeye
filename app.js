@@ -60,50 +60,9 @@ let appState = {
     }
 };
 
-// Mock Database (Restored from backup, will be updated dynamically with Supabase properties)
+// Database - populated entirely from Supabase at runtime, no hardcoded mock data
 const MOCK_DB = {
-    listings: [
-        {
-            id: "list-4",
-            user_id: "user-5",
-            user_name: "Khadra Elmi",
-            user_avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&h=100&q=80",
-            user_role: "Standard User",
-            user_trust: 82,
-            category: "ITEM",
-            title: "Premium Living Room Grey & Orange Sofa Set",
-            description: "Super comfortable modular fabric sofa set. Modern colors matching any living room design. Includes one 3-seater, two single armchairs, and matching slate-colored throw pillows. Very minor wear, under 1 year old.",
-            price: 350,
-            location_name: "Hargeisa, Maroodi Jeex",
-            address_notes: "Near Jigjiga Yar, Section 4",
-            images: ["assets/luxury_sofa.png"],
-            status: "ACTIVE",
-            views_count: 88,
-            item_condition: "LIKE_NEW",
-            item_brand: "HomeDeco",
-            created_at: "2026-06-16T10:00:00Z"
-        },
-        {
-            id: "list-5",
-            user_id: "user-6",
-            user_name: "Mohamed Farah",
-            user_avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=100&h=100&q=80",
-            user_role: "Standard User",
-            user_trust: 79,
-            category: "ITEM",
-            title: "Sleek Double-Door Smart Refrigerator",
-            description: "Smart refrigerator with digital inverter technology. Saves energy, dual cooling, stainless steel finish, built-in water dispenser. Selling because of moving abroad. 100% operational condition.",
-            price: 150,
-            location_name: "Mogadishu, Banadir",
-            address_notes: "Wadajir, near airport gate 2",
-            images: ["assets/smart_refrigerator.png"],
-            status: "ACTIVE",
-            views_count: 215,
-            item_condition: "USED",
-            item_brand: "Samsung",
-            created_at: "2026-06-17T08:00:00Z"
-        }
-    ],
+    listings: [], // Start empty — filled by initSupabaseData() on load
     chats: [
         {
             id: "chat-1",
@@ -200,19 +159,15 @@ function mapSupabasePropertyToListing(prop) {
     };
 }
 
-// Fetch from Supabase and dynamically replace hardcoded listings
+// Fetch all listings from Supabase and populate MOCK_DB at runtime
 async function initSupabaseData() {
-    // ALWAYS remove the hardcoded mock properties (SALE/RENT category) from MOCK_DB.listings
-    MOCK_DB.listings = MOCK_DB.listings.filter(listing => listing.category === "ITEM");
-    
     const dbProperties = await fetchProperties();
     if (dbProperties && dbProperties.length > 0) {
-        // Map to format
-        const mappedProperties = dbProperties.map(mapSupabasePropertyToListing);
-        // Combine them
-        MOCK_DB.listings = [...mappedProperties, ...MOCK_DB.listings];
+        // Replace listings entirely with live Supabase data — no mock data
+        MOCK_DB.listings = dbProperties.map(mapSupabasePropertyToListing);
     } else {
-        console.warn("No properties fetched from Supabase, or failed to connect.");
+        console.warn("No data fetched from Supabase. The listings will be empty.");
+        MOCK_DB.listings = [];
     }
 }
 
