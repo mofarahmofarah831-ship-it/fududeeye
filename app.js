@@ -89,7 +89,7 @@ async function fetchProperties() {
     }
     try {
         const { data: properties, error } = await supabase
-            .from('properties')
+            .from('listings')
             .select('*');
 
         if (error) {
